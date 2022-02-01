@@ -3,15 +3,12 @@ package com.isolpro.library.connection.helpers
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.google.gson.Gson
 import com.isolpro.library.connection.Connection
 
 const val BASE_ENDPOINT = "https://jsonplaceholder.typicode.com/";
 
 class ConnectionHelper<T>(val context: Context) : Connection<T>() {
-  override fun getConfig(): Config {
-    return Config(BASE_ENDPOINT, true)
-  }
+  override var config: Config = Config(BASE_ENDPOINT)
 
   override fun showLoader() {
     Toast.makeText(context, "Showing Loader", Toast.LENGTH_LONG).show();
@@ -41,5 +38,13 @@ class ConnectionHelper<T>(val context: Context) : Connection<T>() {
 
   override fun handleOnOfflineDataUnavailable() {
     Log.e("---------", "handleOnOfflineDataUnavailable");
+  }
+
+  override fun handleOnError(e: Exception) {
+    Log.e("---------", "handleOnError");
+  }
+
+  override fun handleOnNoResponseError() {
+    Log.e("---------", "handleOnNoResponseError");
   }
 }

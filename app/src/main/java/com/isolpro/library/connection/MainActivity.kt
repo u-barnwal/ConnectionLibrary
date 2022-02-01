@@ -10,15 +10,14 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    val connection = ConnectionHelper<Post>(this)
-      .post("posts/")
-      .then {
+    ConnectionHelper<Post>(this)
+      .success {
         Log.e("callback", "Success")
       }
-      .catch {
+      .failure {
         Log.e("callback", "Failure")
       }
-      .execute()
+      .post("posts/")
   }
 
   class Post {
