@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ConnectionLibrary"
 include ':app'
+include ':Connection'
