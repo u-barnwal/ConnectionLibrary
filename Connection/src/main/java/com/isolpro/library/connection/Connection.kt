@@ -1,6 +1,5 @@
 package com.isolpro.library.connection
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.isolpro.custom.Callback
@@ -13,18 +12,16 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-abstract class Connection(val config: Config) {
+abstract class Connection() {
   var OFFLINE_MODE = false
 
   private val mExecutor: Executor = Executors.newSingleThreadExecutor()
   private val handler = Handler(Looper.getMainLooper())
 
-  private val context: Context? = null
-
   private val endpoint: String? = null
   private val request: JSONObject? = null
-  private val onSuccess: Callback<*>? = null
-  private val onFailure: Callback<*>? = null
+  private val then: Callback<*>? = null
+  private val catch: Callback<*>? = null
   private val showLoader = false
   private val silentMode = false
   private var offlineEndpoint: String? = null
@@ -52,7 +49,7 @@ abstract class Connection(val config: Config) {
 //    }
 
     try {
-      val apiURL = URL(config.baseEndpoint + endpoint)
+      val apiURL = URL(getConfig().baseEndpoint + endpoint)
 
 //      Utils.showLog(apiURL, request!!.toString(2))
 
@@ -158,6 +155,8 @@ abstract class Connection(val config: Config) {
       hideLoader()
     }
   }
+
+  abstract fun getConfig(): Config
 
   abstract fun showLoader()
 
