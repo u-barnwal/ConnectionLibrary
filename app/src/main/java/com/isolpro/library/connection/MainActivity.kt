@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     val connection = ConnectionHelper<Post>(this)
+      .post("posts/")
       .then {
         Log.e("callback", "Success")
       }

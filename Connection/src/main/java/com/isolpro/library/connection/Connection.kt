@@ -2,10 +2,11 @@ package com.isolpro.library.connection
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.isolpro.custom.Callback
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -13,18 +14,24 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
+
 abstract class Connection<T>() {
   var OFFLINE_MODE = false
 
   private val mExecutor: Executor = Executors.newSingleThreadExecutor()
   private val handler = Handler(Looper.getMainLooper())
 
-  private val endpoint: String? = null
+  private var endpoint: String = ""
   private val request: T? = null
   private var then: Callback<T>? = null
   private var catch: Callback<T>? = null
   private val showLoader = true
   private var offlineEndpoint: String? = null
+
+  fun post(endpoint: String): Connection<T> {
+    this.endpoint = endpoint;
+    return this;
+  }
 
   fun execute() {
     if (showLoader) showLoader()
@@ -106,8 +113,10 @@ abstract class Connection<T>() {
 
       handler.post { onPostExecute(response.toString()) }
     } catch (e: IOException) {
+      e.message?.let { Log.e("5", it) };
 //      handler.post { showUnexpectedError("Couldn't reach the server!") }
     } catch (e: JSONException) {
+      e.message?.let { Log.e("4", it) };
 //      handler.post { showUnexpectedError("Couldn't reach the server!") }
     }
   }
@@ -125,6 +134,7 @@ abstract class Connection<T>() {
 
       handler.post { onPostExecute(response) }
     } catch (e: IOException) {
+      e.message?.let { Log.e("3", it) };
       handler.post {
 //        Dialog.show(
 //          context as Activity?,
@@ -149,18 +159,15 @@ abstract class Connection<T>() {
 //    handleOnResponseReceived(responseString)
 
     try {
-      val response = JSONObject(responseString)
-//      Utils.showLog("Response", response.toString(2))
+//      val response = JSONObject(responseString)
 
-//      if (!validateResponse(response)) {
-//        showUnexpectedError("Invalid response received!")
-//        return
-//      }
+      handleOnResponseReceived(responseString)
 
       if (hasOfflineEndpoint()) {
         try {
 //          Utils.writeToFile(context, offlineEndpoint, responseString)
         } catch (e: IOException) {
+          e.message?.let { Log.e("2", it) };
 //          Utils.showLog(e.message)
         }
       }
@@ -172,6 +179,7 @@ abstract class Connection<T>() {
 //        "failure" -> onFailure?.exec(if (response.has("data")) response["data"] else null)
 //      }
     } catch (e: JSONException) {
+      e.message?.let { Log.e("1", it) };
 //      Utils.showLog(e.message)
 //      Utils.showLog("Response", responseString)
     } finally {
@@ -189,7 +197,7 @@ abstract class Connection<T>() {
 
   abstract fun handleOnRequestCreated(endpoint: String, data: T?)
 
-  abstract fun handleOnResponseReceived(data: T?)
+  abstract fun handleOnResponseReceived(data: String?)
 
   abstract fun handleOnConnectionError()
 

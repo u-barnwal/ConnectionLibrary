@@ -3,6 +3,7 @@ package com.isolpro.library.connection.helpers
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.google.gson.Gson
 import com.isolpro.library.connection.Connection
 
 const val BASE_ENDPOINT = "https://jsonplaceholder.typicode.com/";
@@ -22,10 +23,12 @@ class ConnectionHelper<T>(val context: Context) : Connection<T>() {
 
   override fun handleOnRequestCreated(endpoint: String, data: T?) {
     Log.e("---------", "handleOnRequestCreated");
+    Log.e("---------", data.toString());
   }
 
-  override fun handleOnResponseReceived(data: T?) {
+  override fun handleOnResponseReceived(data: String?) {
     Log.e("---------", "handleOnResponseReceived");
+    data?.let { Log.e("---------", it) };
   }
 
   override fun handleOnConnectionError() {
