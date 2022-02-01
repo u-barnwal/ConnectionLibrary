@@ -2,6 +2,7 @@ package com.isolpro.library.connection
 
 import android.os.Handler
 import android.os.Looper
+import com.google.gson.Gson
 import com.isolpro.custom.Callback
 import org.json.JSONException
 import org.json.JSONObject
@@ -174,11 +175,17 @@ abstract class Connection() {
     }
   }
 
+  // Callbacks
+
   abstract fun getConfig(): Config
 
   abstract fun showLoader()
 
   abstract fun hideLoader()
+
+  abstract fun handleOnRequestCreated(endpoint: String, data: JSONObject)
+
+  abstract fun handleOnResponseReceived(data: JSONObject)
 
   class Config(val baseEndpoint: String, val supportOffline: Boolean) {
   }
