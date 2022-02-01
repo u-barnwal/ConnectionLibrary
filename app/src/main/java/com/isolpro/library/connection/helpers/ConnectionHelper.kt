@@ -8,6 +8,8 @@ import com.isolpro.library.connection.Connection
 const val BASE_ENDPOINT = "https://jsonplaceholder.typicode.com/";
 
 class ConnectionHelper<T>(val context: Context) : Connection<T>() {
+  override var config: Config = Config(BASE_ENDPOINT)
+
   override fun showLoader() {
     Toast.makeText(context, "Showing Loader", Toast.LENGTH_LONG).show();
   }
@@ -38,5 +40,11 @@ class ConnectionHelper<T>(val context: Context) : Connection<T>() {
     Log.e("---------", "handleOnOfflineDataUnavailable");
   }
 
-  override var config: Config = Config(BASE_ENDPOINT, true)
+  override fun handleOnError(e: Exception) {
+    Log.e("---------", "handleOnError");
+  }
+
+  override fun handleOnNoResponseError() {
+    Log.e("---------", "handleOnNoResponseError");
+  }
 }

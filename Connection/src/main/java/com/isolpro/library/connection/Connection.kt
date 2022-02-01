@@ -2,7 +2,6 @@ package com.isolpro.library.connection
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.google.gson.Gson
 import com.isolpro.custom.Callback
 import org.json.JSONException
@@ -52,21 +51,65 @@ abstract class Connection<T>() {
     return this;
   }
 
-  fun post(endpoint: String): Connection<T> {
+  fun post(endpoint: String) {
     this.requestMode = REQUST_MODE_POST;
     this.endpoint = endpoint;
 
-    return this;
+    execute()
   }
 
-  fun get(endpoint: String): Connection<T> {
+  fun get(endpoint: String) {
     this.requestMode = REQUST_MODE_GET;
     this.endpoint = endpoint;
 
-    return this;
+    execute()
   }
 
-  fun execute() {
+  // Event Methods
+
+  private fun onRequestCreated(endpoint: String, data: T?) {
+    handleOnRequestCreated(endpoint, data);
+  }
+
+  protected open fun onSuccess(res: T?) {
+    success?.exec(res)
+    hideLoader()
+  }
+
+  protected open fun onFailure(res: T?) {
+    failure?.exec(res)
+    hideLoader()
+  }
+
+  private fun onResponseReceived(data: String?) {
+    handleOnResponseReceived(data);
+  }
+
+  protected fun onNoResponseError() {
+    handleOnNoResponseError();
+  }
+
+  private fun onConnectionError() {
+    handleOnConnectionError()
+    hideLoader()
+  }
+
+  private fun onOfflineDataUnsupported() {
+    handleOnOfflineDataUnsupported()
+    hideLoader()
+  }
+
+  private fun onOfflineDataUnavailable() {
+    handleOnOfflineDataUnavailable()
+    hideLoader()
+  }
+
+  private fun onError(e: Exception) {
+    handleOnError(e);
+    hideLoader()
+  }
+
+  private fun execute() {
     if (loader) showLoader()
     if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
   }
@@ -87,32 +130,19 @@ abstract class Connection<T>() {
     return this;
   }
 
-  protected open fun handleOnSuccess(res: T?) {
-    success?.exec(res)
-  }
-
-  protected open fun handleOnFailure(res: T?) {
-    failure?.exec(res)
-  }
-
   private fun hasOfflineEndpoint(): Boolean {
     return offlineEndpoint != null
   }
 
   private fun doInBackground() {
     // TODO: check for network connectivity
-//    if (!Utils.dataNetworkAvailable(context)) {
-//      handler.post { onPostExecute(null) }
-//      return
-//    }
+    // onConnectionError()
 
     try {
       val apiEndpoint = config.baseEndpoint + endpoint;
       val apiURL = URL(apiEndpoint)
 
-      handleOnRequestCreated(apiEndpoint, payload);
-
-//      Utils.showLog(apiURL, request!!.toString(2))
+      onRequestCreated(apiEndpoint, payload);
 
       val httpURLConnection = apiURL.openConnection() as HttpURLConnection
       httpURLConnection.requestMethod = requestMode
@@ -146,17 +176,15 @@ abstract class Connection<T>() {
 
       handler.post { onPostExecute(response.toString()) }
     } catch (e: IOException) {
-      e.message?.let { Log.e("5", it) };
-//      handler.post { showUnexpectedError("Couldn't reach the server!") }
+      onError(e)
     } catch (e: JSONException) {
-      e.message?.let { Log.e("4", it) };
-//      handler.post { showUnexpectedError("Couldn't reach the server!") }
+      onError(e)
     }
   }
 
   private fun doInBackgroundOffline() {
     if (!hasOfflineEndpoint()) {
-//      handler.post { this.handleOperationUnavailable() }
+      onOfflineDataUnsupported()
       return
     }
 
@@ -167,62 +195,36 @@ abstract class Connection<T>() {
 
       handler.post { onPostExecute(response) }
     } catch (e: IOException) {
-      e.message?.let { Log.e("3", it) };
-      handler.post {
-//        Dialog.show(
-//          context as Activity?,
-//          "Offline Data Unavailable",
-//          "Please connect to internet at least once to download data!",
-//          Dialog.Button.generateOkay(),
-//          null,
-//          UIDialog.getAnimation(UIDialog.Type.INFO)
-//        )
-
-        hideLoader()
-      }
+      onError(e)
     }
   }
 
   private fun onPostExecute(responseString: String?) {
-//    if (responseString == null) {
-//      handleDataNetworkUnavailable()
-//      return
-//    }
+    if (responseString == null) {
+      onNoResponseError()
+      return
+    }
 
-//    handleOnResponseReceived(responseString)
+    onResponseReceived(responseString)
 
     try {
 //      val response = JSONObject(responseString)
-
-      handleOnResponseReceived(responseString)
 
       if (hasOfflineEndpoint()) {
         try {
 //          Utils.writeToFile(context, offlineEndpoint, responseString)
         } catch (e: IOException) {
-          e.message?.let { Log.e("2", it) };
-//          Utils.showLog(e.message)
+          onError(e)
         }
       }
-
-//      handleResponseUI(response)
-
-//      when (response.getJSONObject("prop").getString("status")) {
-//        "success" -> onSuccess?.exec(if (response.has("data")) response["data"] else null)
-//        "failure" -> onFailure?.exec(if (response.has("data")) response["data"] else null)
-//      }
     } catch (e: JSONException) {
-      e.message?.let { Log.e("1", it) };
-//      Utils.showLog(e.message)
-//      Utils.showLog("Response", responseString)
+      onError(e)
     } finally {
       hideLoader()
     }
   }
 
   // Callbacks
-
-//  abstract fun getConfig(): Config
 
   abstract fun showLoader()
 
@@ -232,12 +234,16 @@ abstract class Connection<T>() {
 
   abstract fun handleOnResponseReceived(data: String?)
 
+  abstract fun handleOnNoResponseError()
+
   abstract fun handleOnConnectionError()
 
   abstract fun handleOnOfflineDataUnsupported()
 
   abstract fun handleOnOfflineDataUnavailable()
 
-  class Config(val baseEndpoint: String, val supportOffline: Boolean) {
+  abstract fun handleOnError(e: Exception)
+
+  class Config(val baseEndpoint: String) {
   }
 }

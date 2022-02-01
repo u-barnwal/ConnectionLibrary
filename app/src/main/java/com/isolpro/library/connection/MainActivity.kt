@@ -11,14 +11,13 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     ConnectionHelper<Post>(this)
-      .post("posts/")
       .success {
         Log.e("callback", "Success")
       }
       .failure {
         Log.e("callback", "Failure")
       }
-      .execute()
+      .post("posts/")
   }
 
   class Post {
