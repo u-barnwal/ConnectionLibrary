@@ -20,39 +20,39 @@ abstract class Connection() {
 
   private val endpoint: String? = null
   private val request: JSONObject? = null
-  private var then: Callback<*>? = null
-  private var catch: Callback<*>? = null
+  private var then: Callback<Any>? = null
+  private var catch: Callback<Any>? = null
   private val showLoader = true
   private var offlineEndpoint: String? = null
 
   fun execute() {
     if (showLoader) showLoader()
-    handleOnSuccess()
+    handleOnSuccess("")
 //    if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
   }
 
   fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection {
-    val suffix = uniqueRowId?.toString() ?: ""
+    val suffix = uniqueRowId ?: ""
     this.offlineEndpoint = offlineEndpoint + suffix
     return this
   }
 
-  fun then(then: Callback<*>): Connection {
+  fun then(then: Callback<Any>): Connection {
     this.then = then;
     return this;
   }
 
-  fun catch(catch: Callback<*>): Connection {
+  fun catch(catch: Callback<Any>): Connection {
     this.catch = catch;
     return this;
   }
 
-  private fun handleOnSuccess() {
-    then?.exec(null)
+  protected open fun handleOnSuccess(res: Any) {
+    then?.exec(res)
   }
 
-  private fun handleOnFailure() {
-    then?.exec(null)
+  protected open fun handleOnFailure(res: Any) {
+    then?.exec(res)
   }
 
   private fun hasOfflineEndpoint(): Boolean {
