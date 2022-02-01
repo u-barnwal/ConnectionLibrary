@@ -13,14 +13,14 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-abstract class Connection() {
+abstract class Connection<T>() {
   var OFFLINE_MODE = false
 
   private val mExecutor: Executor = Executors.newSingleThreadExecutor()
   private val handler = Handler(Looper.getMainLooper())
 
   private val endpoint: String? = null
-  private val request: JSONObject? = null
+  private val request: T? = null
   private var then: Callback<Any>? = null
   private var catch: Callback<Any>? = null
   private val showLoader = true
@@ -32,18 +32,18 @@ abstract class Connection() {
 //    if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
   }
 
-  fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection {
+  fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
     val suffix = uniqueRowId ?: ""
     this.offlineEndpoint = offlineEndpoint + suffix
     return this
   }
 
-  fun then(then: Callback<Any>): Connection {
+  fun then(then: Callback<Any>): Connection<T> {
     this.then = then;
     return this;
   }
 
-  fun catch(catch: Callback<Any>): Connection {
+  fun catch(catch: Callback<Any>): Connection<T> {
     this.catch = catch;
     return this;
   }
@@ -80,7 +80,7 @@ abstract class Connection() {
       val outputStream = httpURLConnection.outputStream
 
       val bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream, StandardCharsets.UTF_8))
-      bufferedWriter.write(request.toString())
+      bufferedWriter.write(Gson().toJson(request))
       bufferedWriter.flush()
       bufferedWriter.close()
 
@@ -183,9 +183,9 @@ abstract class Connection() {
 
   abstract fun hideLoader()
 
-  abstract fun handleOnRequestCreated(endpoint: String, data: JSONObject)
+  abstract fun handleOnRequestCreated(endpoint: String, data: T)
 
-  abstract fun handleOnResponseReceived(data: JSONObject)
+  abstract fun handleOnResponseReceived(data: T)
 
   class Config(val baseEndpoint: String, val supportOffline: Boolean) {
   }
