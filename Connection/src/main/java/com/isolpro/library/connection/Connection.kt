@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.isolpro.custom.Callback
 import org.json.JSONException
 import java.io.*
@@ -18,23 +17,57 @@ import java.util.concurrent.Executors
 abstract class Connection<T>() {
   var OFFLINE_MODE = false
 
+  val REQUST_MODE_POST = "POST";
+  val REQUST_MODE_GET = "GET";
+
   private val mExecutor: Executor = Executors.newSingleThreadExecutor()
   private val handler = Handler(Looper.getMainLooper())
 
+  protected abstract var config: Config;
+
+  private var payload: T? = null
+  private var success: Callback<T>? = null
+  private var failure: Callback<T>? = null
+  private var loader = true
+
   private var endpoint: String = ""
-  private val request: T? = null
-  private var then: Callback<T>? = null
-  private var catch: Callback<T>? = null
-  private val showLoader = true
+  private var requestMode: String = REQUST_MODE_POST
+
   private var offlineEndpoint: String? = null
 
+  // Public Methods
+
+  fun payload(payload: T?): Connection<T> {
+    this.payload = payload;
+    return this;
+  }
+
+  fun config(config: Config): Connection<T> {
+    this.config = config;
+    return this;
+  }
+
+  fun loader(loader: Boolean): Connection<T> {
+    this.loader = loader;
+    return this;
+  }
+
   fun post(endpoint: String): Connection<T> {
+    this.requestMode = REQUST_MODE_POST;
     this.endpoint = endpoint;
+
+    return this;
+  }
+
+  fun get(endpoint: String): Connection<T> {
+    this.requestMode = REQUST_MODE_GET;
+    this.endpoint = endpoint;
+
     return this;
   }
 
   fun execute() {
-    if (showLoader) showLoader()
+    if (loader) showLoader()
     if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
   }
 
@@ -44,22 +77,22 @@ abstract class Connection<T>() {
     return this
   }
 
-  fun then(then: Callback<T>): Connection<T> {
-    this.then = then;
+  fun success(success: Callback<T>): Connection<T> {
+    this.success = success;
     return this;
   }
 
-  fun catch(catch: Callback<T>): Connection<T> {
-    this.catch = catch;
+  fun failure(failure: Callback<T>): Connection<T> {
+    this.failure = failure;
     return this;
   }
 
   protected open fun handleOnSuccess(res: T?) {
-    then?.exec(res)
+    success?.exec(res)
   }
 
   protected open fun handleOnFailure(res: T?) {
-    then?.exec(res)
+    failure?.exec(res)
   }
 
   private fun hasOfflineEndpoint(): Boolean {
@@ -74,22 +107,22 @@ abstract class Connection<T>() {
 //    }
 
     try {
-      val apiEndpoint = getConfig().baseEndpoint + endpoint;
+      val apiEndpoint = config.baseEndpoint + endpoint;
       val apiURL = URL(apiEndpoint)
 
-      handleOnRequestCreated(apiEndpoint, request);
+      handleOnRequestCreated(apiEndpoint, payload);
 
 //      Utils.showLog(apiURL, request!!.toString(2))
 
       val httpURLConnection = apiURL.openConnection() as HttpURLConnection
-      httpURLConnection.requestMethod = "POST"
+      httpURLConnection.requestMethod = requestMode
       httpURLConnection.doOutput = true
       httpURLConnection.doInput = true
 
       val outputStream = httpURLConnection.outputStream
 
       val bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream, StandardCharsets.UTF_8))
-      bufferedWriter.write(Gson().toJson(request))
+      bufferedWriter.write(Gson().toJson(payload))
       bufferedWriter.flush()
       bufferedWriter.close()
 
@@ -189,7 +222,7 @@ abstract class Connection<T>() {
 
   // Callbacks
 
-  abstract fun getConfig(): Config
+//  abstract fun getConfig(): Config
 
   abstract fun showLoader()
 
