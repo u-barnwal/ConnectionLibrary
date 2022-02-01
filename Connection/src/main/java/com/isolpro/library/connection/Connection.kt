@@ -21,15 +21,14 @@ abstract class Connection<T>() {
 
   private val endpoint: String? = null
   private val request: T? = null
-  private var then: Callback<Any>? = null
-  private var catch: Callback<Any>? = null
+  private var then: Callback<T>? = null
+  private var catch: Callback<T>? = null
   private val showLoader = true
   private var offlineEndpoint: String? = null
 
   fun execute() {
     if (showLoader) showLoader()
-    handleOnSuccess("")
-//    if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
+    if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
   }
 
   fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
@@ -38,21 +37,21 @@ abstract class Connection<T>() {
     return this
   }
 
-  fun then(then: Callback<Any>): Connection<T> {
+  fun then(then: Callback<T>): Connection<T> {
     this.then = then;
     return this;
   }
 
-  fun catch(catch: Callback<Any>): Connection<T> {
+  fun catch(catch: Callback<T>): Connection<T> {
     this.catch = catch;
     return this;
   }
 
-  protected open fun handleOnSuccess(res: Any) {
+  protected open fun handleOnSuccess(res: T?) {
     then?.exec(res)
   }
 
-  protected open fun handleOnFailure(res: Any) {
+  protected open fun handleOnFailure(res: T?) {
     then?.exec(res)
   }
 
@@ -68,7 +67,10 @@ abstract class Connection<T>() {
 //    }
 
     try {
-      val apiURL = URL(getConfig().baseEndpoint + endpoint)
+      val apiEndpoint = getConfig().baseEndpoint + endpoint;
+      val apiURL = URL(apiEndpoint)
+
+      handleOnRequestCreated(apiEndpoint, request);
 
 //      Utils.showLog(apiURL, request!!.toString(2))
 
@@ -144,6 +146,8 @@ abstract class Connection<T>() {
 //      return
 //    }
 
+//    handleOnResponseReceived(responseString)
+
     try {
       val response = JSONObject(responseString)
 //      Utils.showLog("Response", response.toString(2))
@@ -183,9 +187,15 @@ abstract class Connection<T>() {
 
   abstract fun hideLoader()
 
-  abstract fun handleOnRequestCreated(endpoint: String, data: T)
+  abstract fun handleOnRequestCreated(endpoint: String, data: T?)
 
-  abstract fun handleOnResponseReceived(data: T)
+  abstract fun handleOnResponseReceived(data: T?)
+
+  abstract fun handleOnConnectionError()
+
+  abstract fun handleOnOfflineDataUnsupported()
+
+  abstract fun handleOnOfflineDataUnavailable()
 
   class Config(val baseEndpoint: String, val supportOffline: Boolean) {
   }
