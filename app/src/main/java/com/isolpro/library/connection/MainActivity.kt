@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.isolpro.library.connection.helpers.ConnectionHelper
+import com.isolpro.library.connection.models.Post
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    ConnectionHelper<Post>(this, Post::class.java)
+    ConnectionHelper(this, Post::class.java)
       .loader(false)
       .success {
         Log.e("callback", "Success")
@@ -20,12 +21,5 @@ class MainActivity : AppCompatActivity() {
         Log.e("callback", "Failure")
       }
       .post("posts/")
-  }
-
-  class Post {
-    val userId: Number = 0;
-    val id: Number = 0;
-    val title: String = "";
-    val body: String = "";
   }
 }
