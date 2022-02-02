@@ -1,9 +1,11 @@
 package com.isolpro.library.connection
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
 import com.isolpro.custom.Callback
+import com.isolpro.library.connection.helpers.Utils
 import org.json.JSONException
 import java.io.*
 import java.net.HttpURLConnection
@@ -226,13 +228,17 @@ abstract class Connection<T>() {
     }
   }
 
+  private fun isOfflineMode(): Boolean {
+    return !Utils.isOnline(getContext())
+  }
+
   // Callbacks
+
+  abstract fun getContext(): Context
 
   abstract fun showLoader()
 
   abstract fun hideLoader()
-
-  abstract fun isOfflineMode(): Boolean
 
   abstract fun handleOnRequestCreated(endpoint: String, data: T?)
 
