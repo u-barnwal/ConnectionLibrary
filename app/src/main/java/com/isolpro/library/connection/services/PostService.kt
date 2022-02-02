@@ -13,4 +13,11 @@ object PostService {
       .loader(false)
   }
 
+  fun createPost(ctx: Context, post: Post): Connection<Post> {
+    return ConnectionHelper(ctx, Post::class.java)
+      .payload(post)
+      .endpoint("/posts")
+      .loader(false)
+  }
+
 }
