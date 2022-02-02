@@ -146,7 +146,7 @@ abstract class Connection<T>() {
   }
 
   private fun hasOfflineEndpoint(): Boolean {
-    return offlineEndpoint != null
+    return offlineEndpoint != null && offlineEndpoint != ""
   }
 
   private fun doInBackground() {
@@ -199,6 +199,8 @@ abstract class Connection<T>() {
       onOfflineDataUnsupported()
       return
     }
+
+    onRequestCreated("offline://$offlineEndpoint", payload);
 
     try {
       // Read data from file here
