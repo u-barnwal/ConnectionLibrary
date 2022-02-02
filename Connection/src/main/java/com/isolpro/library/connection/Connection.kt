@@ -1,9 +1,11 @@
 package com.isolpro.library.connection
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
 import com.isolpro.custom.Callback
+import com.isolpro.library.connection.helpers.Utils
 import org.json.JSONException
 import java.io.*
 import java.net.HttpURLConnection
@@ -30,7 +32,7 @@ abstract class Connection<T>() {
   private var endpoint: String = ""
   private var requestMode: String = REQUST_MODE_POST
 
-  private var offlineEndpoint: String? = null
+  private var offlineEndpoint: String? = ""
 
   // Public Methods
 
@@ -69,14 +71,22 @@ abstract class Connection<T>() {
     handleOnRequestCreated(endpoint, data);
   }
 
-  protected open fun onSuccess(res: T?) {
-    success?.exec(res)
-    hideLoader()
+  private fun onShowLoader() {
+    if (loader) showLoader()
   }
 
-  protected open fun onFailure(res: T?) {
-    failure?.exec(res)
-    hideLoader()
+  private fun onHideLoader() {
+    if (loader) hideLoader()
+  }
+
+  protected open fun onSuccess(res: T?) {
+    success?.exec(res)
+    onHideLoader()
+  }
+
+  protected open fun onFailure() {
+    failure?.exec(null)
+    onHideLoader()
   }
 
   private fun onResponseReceived(data: String?) {
@@ -94,26 +104,26 @@ abstract class Connection<T>() {
   private fun onOfflineDataUnsupported() {
     handler.post {
       handleOnOfflineDataUnsupported()
-      hideLoader()
+      onHideLoader()
     }
   }
 
   private fun onOfflineDataUnavailable() {
     handler.post {
       handleOnOfflineDataUnavailable()
-      hideLoader()
+      onHideLoader()
     }
   }
 
   private fun onError(e: Exception) {
     handler.post {
       handleOnError(e);
-      hideLoader()
+      onHideLoader()
     }
   }
 
   private fun execute() {
-    if (loader) showLoader()
+    if (loader) onShowLoader()
 
     if (!isOfflineMode()) mExecutor.execute { this.doInBackground() }
     else mExecutor.execute { this.doInBackgroundOffline() }
@@ -192,12 +202,17 @@ abstract class Connection<T>() {
 
     try {
       // Read data from file here
-//      val response: String = Utils.readFromFile(context, offlineEndpoint)
-      val response: String = ""
+      val response: String? = offlineEndpoint?.let { Utils.readFromFile(getContext(), it) }
+
+      if (response === null || response == "") {
+        onOfflineDataUnavailable()
+        return
+      }
 
       handler.post { onPostExecute(response) }
     } catch (e: IOException) {
       onError(e)
+      onOfflineDataUnavailable()
     }
   }
 
@@ -210,29 +225,34 @@ abstract class Connection<T>() {
     onResponseReceived(responseString)
 
     try {
-//      val response = JSONObject(responseString)
+      val res: T = Gson().fromJson(responseString, getClassType());
+
+      onSuccess(res);
 
       if (hasOfflineEndpoint()) {
         try {
-//          Utils.writeToFile(context, offlineEndpoint, responseString)
+          offlineEndpoint?.let { Utils.writeToFile(getContext(), it, responseString) }
         } catch (e: IOException) {
           onError(e)
         }
       }
     } catch (e: JSONException) {
       onError(e)
-    } finally {
-      hideLoader()
+      onFailure()
     }
+  }
+
+  private fun isOfflineMode(): Boolean {
+    return !Utils.isOnline(getContext())
   }
 
   // Callbacks
 
+  abstract fun getContext(): Context
+
   abstract fun showLoader()
 
   abstract fun hideLoader()
-
-  abstract fun isOfflineMode(): Boolean
 
   abstract fun handleOnRequestCreated(endpoint: String, data: T?)
 
@@ -245,6 +265,8 @@ abstract class Connection<T>() {
   abstract fun handleOnOfflineDataUnavailable()
 
   abstract fun handleOnError(e: Exception)
+
+  abstract fun getClassType(): Class<T>
 
   class Config(val baseEndpoint: String) {
   }
