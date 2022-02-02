@@ -41,7 +41,8 @@ class ConnectionHelper<T>(val ctx: Context) : Connection<T>() {
   }
 
   override fun handleOnError(e: Exception) {
-    Log.e("---------", "handleOnError");
+    Log.e("Error:", "");
+    e.message?.let { Log.e("", it) };
   }
 
   override fun handleOnNoResponseError() {

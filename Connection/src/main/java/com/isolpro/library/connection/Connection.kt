@@ -32,7 +32,7 @@ abstract class Connection<T>() {
   private var endpoint: String = ""
   private var requestMode: String = REQUST_MODE_POST
 
-  private var offlineEndpoint: String? = null
+  private var offlineEndpoint: String? = ""
 
   // Public Methods
 
@@ -194,12 +194,17 @@ abstract class Connection<T>() {
 
     try {
       // Read data from file here
-//      val response: String = Utils.readFromFile(context, offlineEndpoint)
-      val response: String = ""
+      val response: String? = offlineEndpoint?.let { Utils.readFromFile(getContext(), it) }
+
+      if (response === null || response == "") {
+        onOfflineDataUnavailable()
+        return
+      }
 
       handler.post { onPostExecute(response) }
     } catch (e: IOException) {
       onError(e)
+      onOfflineDataUnavailable()
     }
   }
 
@@ -216,7 +221,7 @@ abstract class Connection<T>() {
 
       if (hasOfflineEndpoint()) {
         try {
-//          Utils.writeToFile(context, offlineEndpoint, responseString)
+          offlineEndpoint?.let { Utils.writeToFile(getContext(), it, responseString) }
         } catch (e: IOException) {
           onError(e)
         }
