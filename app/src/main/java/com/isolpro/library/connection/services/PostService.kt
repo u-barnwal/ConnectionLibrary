@@ -10,14 +10,8 @@ object PostService {
 
   fun getPosts(ctx: Context): Connection<Post> {
     return ConnectionHelper(ctx, Post::class.java)
+      .endpoint("posts/")
       .loader(false)
-      .success {
-        Log.e("callback", "Success")
-        Log.e("Product Id: ", it.id.toString());
-      }
-      .failure {
-        Log.e("callback", "Failure")
-      }
   }
 
 }
