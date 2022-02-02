@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
       .failure {
         Log.e("callback", "Failure")
       }
-      .post("posts/")
+      .endpoint("posts/")
+      .post()
   }
 }

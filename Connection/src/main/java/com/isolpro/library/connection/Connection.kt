@@ -36,6 +36,16 @@ abstract class Connection<T>() {
 
   // Public Methods
 
+  fun endpoint(endpoint: String): Connection<T> {
+    this.endpoint = endpoint
+    return this;
+  }
+
+  fun offlineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
+    this.offlineEndpoint = offlineEndpoint + uniqueRowId
+    return this;
+  }
+
   fun payload(payload: T?): Connection<T> {
     this.payload = payload;
     return this;
@@ -51,17 +61,13 @@ abstract class Connection<T>() {
     return this;
   }
 
-  fun post(endpoint: String) {
+  fun post() {
     this.requestMode = REQUST_MODE_POST;
-    this.endpoint = endpoint;
-
     execute()
   }
 
-  fun get(endpoint: String) {
+  fun get() {
     this.requestMode = REQUST_MODE_GET;
-    this.endpoint = endpoint;
-
     execute()
   }
 
@@ -127,12 +133,6 @@ abstract class Connection<T>() {
 
     if (!isOfflineMode()) mExecutor.execute { this.doInBackground() }
     else mExecutor.execute { this.doInBackgroundOffline() }
-  }
-
-  fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
-    val suffix = uniqueRowId ?: ""
-    this.offlineEndpoint = offlineEndpoint + suffix
-    return this
   }
 
   fun success(success: Callback<T>): Connection<T> {
