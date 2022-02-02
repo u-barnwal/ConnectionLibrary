@@ -71,14 +71,22 @@ abstract class Connection<T>() {
     handleOnRequestCreated(endpoint, data);
   }
 
-  protected open fun onSuccess(res: T?) {
-    success?.exec(res)
-    hideLoader()
+  private fun onShowLoader() {
+    if (loader) showLoader()
   }
 
-  protected open fun onFailure(res: T?) {
-    failure?.exec(res)
-    hideLoader()
+  private fun onHideLoader() {
+    if (loader) hideLoader()
+  }
+
+  protected open fun onSuccess(res: T?) {
+    success?.exec(res)
+    onHideLoader()
+  }
+
+  protected open fun onFailure() {
+    failure?.exec(null)
+    onHideLoader()
   }
 
   private fun onResponseReceived(data: String?) {
@@ -96,26 +104,26 @@ abstract class Connection<T>() {
   private fun onOfflineDataUnsupported() {
     handler.post {
       handleOnOfflineDataUnsupported()
-      hideLoader()
+      onHideLoader()
     }
   }
 
   private fun onOfflineDataUnavailable() {
     handler.post {
       handleOnOfflineDataUnavailable()
-      hideLoader()
+      onHideLoader()
     }
   }
 
   private fun onError(e: Exception) {
     handler.post {
       handleOnError(e);
-      hideLoader()
+      onHideLoader()
     }
   }
 
   private fun execute() {
-    if (loader) showLoader()
+    if (loader) onShowLoader()
 
     if (!isOfflineMode()) mExecutor.execute { this.doInBackground() }
     else mExecutor.execute { this.doInBackgroundOffline() }
@@ -217,7 +225,9 @@ abstract class Connection<T>() {
     onResponseReceived(responseString)
 
     try {
-//      val response = JSONObject(responseString)
+      val res: T = Gson().fromJson(responseString, getClassType());
+
+      onSuccess(res);
 
       if (hasOfflineEndpoint()) {
         try {
@@ -228,8 +238,7 @@ abstract class Connection<T>() {
       }
     } catch (e: JSONException) {
       onError(e)
-    } finally {
-      hideLoader()
+      onFailure()
     }
   }
 
@@ -256,6 +265,8 @@ abstract class Connection<T>() {
   abstract fun handleOnOfflineDataUnavailable()
 
   abstract fun handleOnError(e: Exception)
+
+  abstract fun getClassType(): Class<T>
 
   class Config(val baseEndpoint: String) {
   }

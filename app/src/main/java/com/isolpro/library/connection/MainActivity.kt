@@ -10,9 +10,11 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    ConnectionHelper<Post>(this)
+    ConnectionHelper<Post>(this, Post::class.java)
+      .loader(false)
       .success {
         Log.e("callback", "Success")
+        Log.e("Product Id: ", it.id.toString());
       }
       .failure {
         Log.e("callback", "Failure")
