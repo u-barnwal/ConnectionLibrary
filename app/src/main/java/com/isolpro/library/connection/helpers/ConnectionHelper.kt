@@ -28,10 +28,6 @@ class ConnectionHelper<T>(val context: Context) : Connection<T>() {
     data?.let { Log.e("---------", it) };
   }
 
-  override fun handleOnConnectionError() {
-    Log.e("---------", "handleOnConnectionError");
-  }
-
   override fun handleOnOfflineDataUnsupported() {
     Log.e("---------", "handleOnOfflineDataUnsupported");
   }
@@ -46,5 +42,9 @@ class ConnectionHelper<T>(val context: Context) : Connection<T>() {
 
   override fun handleOnNoResponseError() {
     Log.e("---------", "handleOnNoResponseError");
+  }
+
+  override fun isOfflineMode(): Boolean {
+    return !Utils.isOnline(context)
   }
 }

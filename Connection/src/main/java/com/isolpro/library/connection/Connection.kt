@@ -14,10 +14,8 @@ import java.util.concurrent.Executors
 
 
 abstract class Connection<T>() {
-  var OFFLINE_MODE = false
-
-  val REQUST_MODE_POST = "POST";
-  val REQUST_MODE_GET = "GET";
+  private val REQUST_MODE_POST = "POST";
+  private val REQUST_MODE_GET = "GET";
 
   private val mExecutor: Executor = Executors.newSingleThreadExecutor()
   private val handler = Handler(Looper.getMainLooper())
@@ -82,36 +80,43 @@ abstract class Connection<T>() {
   }
 
   private fun onResponseReceived(data: String?) {
-    handleOnResponseReceived(data);
+    handler.post {
+      handleOnResponseReceived(data);
+    }
   }
 
-  protected fun onNoResponseError() {
-    handleOnNoResponseError();
-  }
-
-  private fun onConnectionError() {
-    handleOnConnectionError()
-    hideLoader()
+  private fun onNoResponseError() {
+    handler.post {
+      handleOnNoResponseError();
+    }
   }
 
   private fun onOfflineDataUnsupported() {
-    handleOnOfflineDataUnsupported()
-    hideLoader()
+    handler.post {
+      handleOnOfflineDataUnsupported()
+      hideLoader()
+    }
   }
 
   private fun onOfflineDataUnavailable() {
-    handleOnOfflineDataUnavailable()
-    hideLoader()
+    handler.post {
+      handleOnOfflineDataUnavailable()
+      hideLoader()
+    }
   }
 
   private fun onError(e: Exception) {
-    handleOnError(e);
-    hideLoader()
+    handler.post {
+      handleOnError(e);
+      hideLoader()
+    }
   }
 
   private fun execute() {
     if (loader) showLoader()
-    if (!OFFLINE_MODE) mExecutor.execute { this.doInBackground() } else mExecutor.execute { this.doInBackgroundOffline() }
+
+    if (!isOfflineMode()) mExecutor.execute { this.doInBackground() }
+    else mExecutor.execute { this.doInBackgroundOffline() }
   }
 
   fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
@@ -135,9 +140,6 @@ abstract class Connection<T>() {
   }
 
   private fun doInBackground() {
-    // TODO: check for network connectivity
-    // onConnectionError()
-
     try {
       val apiEndpoint = config.baseEndpoint + endpoint;
       val apiURL = URL(apiEndpoint)
@@ -230,13 +232,13 @@ abstract class Connection<T>() {
 
   abstract fun hideLoader()
 
+  abstract fun isOfflineMode(): Boolean
+
   abstract fun handleOnRequestCreated(endpoint: String, data: T?)
 
   abstract fun handleOnResponseReceived(data: String?)
 
   abstract fun handleOnNoResponseError()
-
-  abstract fun handleOnConnectionError()
 
   abstract fun handleOnOfflineDataUnsupported()
 
