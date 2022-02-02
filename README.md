@@ -4,32 +4,35 @@ HTTP connection library to consume REST APIs in structured way with automatic su
 
 ## Implementation
 **Step 1:** Add to project level build.gradle
-
-    allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
+```gradle
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
 	}
+}
+```
 
 **Step 2:** Add to app level build.gradle
 
-	dependencies {
-	    implementation 'com.github.u-barnwal:ConnectionLibrary:VERSION'
-	}
+```gradle
+dependencies {
+	implementation 'com.github.u-barnwal:ConnectionLibrary:VERSION'
+}
+```
 
-## How to use
+## How to use?
 
 ### Create Helper Class
 You need to create a helper class that configures the **Connection** and provides callbacks for all events.
 <details>
-  <summary>Expand Code</summary>
+  <summary>Expand: <kbd>ConnectionHelper.kt</kbd></summary>
   
 ```kotlin
 import android.content.Context
 import com.isolpro.library.connection.Connection
 
-class CHelper<T>(private val ctx: Context, private val classType: Class<T>) : Connection<T>() {
+class ConnectionHelper<T>(private val ctx: Context, private val classType: Class<T>) : Connection<T>() {
 	override var config: Config = Config("API_BASE_ENDPOINT")
 
 	override fun getContext(): Context {
@@ -91,8 +94,6 @@ class Post {
 ```
 </details>
 
-
-
 ### Create Services
 We also suggest to create service class with all request functions required for the data model.
 
@@ -111,7 +112,7 @@ object PostService {
 	fun createPost(ctx: Context, post: Post): Connection<Post> {
 		return ConnectionHelper(ctx, Post::class.java)
 			.payload(post)
-			.endpoint("/posts")
+			.endpoint("/posts/insert")
 			.loader(false)
 	}
 
@@ -122,33 +123,35 @@ object PostService {
 ### Making the Request
 Once you have created your models and services, making a request is a piece of cake
 
-<details>
-  <summary>Making a Simple Request</summary>
+- Simple Request
+	```kotlin
+	PostService.getPosts(this)
+		.post()
+	```
 
-```kotlin
-PostService.getPosts(this)
-  .post()
-```
-</details>
+- Request with Callbacks
+	```kotlin
+	PostService.getPosts(this)
+		.success {
+			TODO("Use your data from $it")
+			// use $it.userId to get userId from Post 
+		}
+		.failure {
+			TODO("Let user know that the request has failed")
+		}
+		.post()
+		}
+	```
 
-<details>
-  <summary>Making a Simple Request with Callbacks</summary>
+And you're done ✅
 
-```kotlin
-PostService.getPosts(this)
-  .post()
-```
-</details>
-
-
-```kotlin
-```
 
 See [sample app]("./app/src/main")
 
 ## Features
 
  - Easy to use
- - Easy to customize
+ - Easy to customize & configure
+ - Automated offline mode
  - Simple file structure: Create *models* & *services*
  - Syntax similar to modern programming notions
