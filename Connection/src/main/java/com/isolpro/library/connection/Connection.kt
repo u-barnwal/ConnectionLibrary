@@ -3,10 +3,12 @@ package com.isolpro.library.connection
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.google.gson.Gson
 import com.isolpro.custom.Callback
 import com.isolpro.library.connection.helpers.Utils
 import org.json.JSONException
+import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -24,7 +26,7 @@ abstract class Connection<T>() {
 
   protected abstract var config: Config;
 
-  private var payload: T? = null
+  private var payload: Any? = JSONObject()
   private var success: Callback<T>? = null
   private var failure: Callback<T>? = null
   private var loader = true
@@ -35,6 +37,16 @@ abstract class Connection<T>() {
   private var offlineEndpoint: String? = ""
 
   // Public Methods
+
+  fun endpoint(endpoint: String): Connection<T> {
+    this.endpoint = endpoint
+    return this;
+  }
+
+  fun offlineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
+    this.offlineEndpoint = offlineEndpoint + uniqueRowId
+    return this;
+  }
 
   fun payload(payload: T?): Connection<T> {
     this.payload = payload;
@@ -51,23 +63,14 @@ abstract class Connection<T>() {
     return this;
   }
 
-  fun post(endpoint: String) {
+  fun post() {
     this.requestMode = REQUST_MODE_POST;
-    this.endpoint = endpoint;
-
-    execute()
-  }
-
-  fun get(endpoint: String) {
-    this.requestMode = REQUST_MODE_GET;
-    this.endpoint = endpoint;
-
     execute()
   }
 
   // Event Methods
 
-  private fun onRequestCreated(endpoint: String, data: T?) {
+  private fun onRequestCreated(endpoint: String, data: Any?) {
     handleOnRequestCreated(endpoint, data);
   }
 
@@ -129,12 +132,6 @@ abstract class Connection<T>() {
     else mExecutor.execute { this.doInBackgroundOffline() }
   }
 
-  fun setOfflineEndpoint(offlineEndpoint: String, uniqueRowId: String? = ""): Connection<T> {
-    val suffix = uniqueRowId ?: ""
-    this.offlineEndpoint = offlineEndpoint + suffix
-    return this
-  }
-
   fun success(success: Callback<T>): Connection<T> {
     this.success = success;
     return this;
@@ -146,7 +143,7 @@ abstract class Connection<T>() {
   }
 
   private fun hasOfflineEndpoint(): Boolean {
-    return offlineEndpoint != null
+    return offlineEndpoint != null && offlineEndpoint != ""
   }
 
   private fun doInBackground() {
@@ -186,6 +183,8 @@ abstract class Connection<T>() {
       inputStream.close()
       httpURLConnection.disconnect()
 
+      Log.e("Response: ", response.toString());
+
       handler.post { onPostExecute(response.toString()) }
     } catch (e: IOException) {
       onError(e)
@@ -199,6 +198,8 @@ abstract class Connection<T>() {
       onOfflineDataUnsupported()
       return
     }
+
+    onRequestCreated("offline://$offlineEndpoint", payload);
 
     try {
       // Read data from file here
@@ -254,7 +255,7 @@ abstract class Connection<T>() {
 
   abstract fun hideLoader()
 
-  abstract fun handleOnRequestCreated(endpoint: String, data: T?)
+  abstract fun handleOnRequestCreated(endpoint: String, data: Any?)
 
   abstract fun handleOnResponseReceived(data: String?)
 
