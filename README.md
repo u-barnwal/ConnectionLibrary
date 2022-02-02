@@ -145,8 +145,38 @@ Once you have created your models and services, making a request is a piece of c
 
 And you're done ✅
 
+## Enable Offline Mode
 
-See [sample app]("./app/src/main")
+To make a request to start caching data for offline usage, just pass a unique `offlineEndpoint` . **Not to be used with data creation/modification requests**.
+
+### When fetching a list of items
+```kotlin
+ConnectionHelper(ctx, Post::class.java)
+	.payload(post)
+	.endpoint("/posts")
+	.offlineEndpoint("posts")
+	.loader(false)
+```
+
+### When fetching a single item (*pass the unique item it as second parameter*)
+```kotlin
+ConnectionHelper(ctx, Post::class.java)
+	.payload(post)
+	.endpoint("/posts/$postId")
+	.offlineEndpoint("posts", postId)
+	.loader(false)
+```
+
+### Recommended attributes for `offlineEndpoint`
+- should be unique
+- avoid using any symbols
+- cannot be empty (empty indicates that request doesn't support offline mode)
+
+
+And you're done ✅
+
+
+| **See [sample app]("./app/src/main")**
 
 ## Features
 
