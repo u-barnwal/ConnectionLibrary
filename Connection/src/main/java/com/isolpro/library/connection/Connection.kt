@@ -3,10 +3,12 @@ package com.isolpro.library.connection
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.google.gson.Gson
 import com.isolpro.custom.Callback
 import com.isolpro.library.connection.helpers.Utils
 import org.json.JSONException
+import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -24,7 +26,7 @@ abstract class Connection<T>() {
 
   protected abstract var config: Config;
 
-  private var payload: T? = null
+  private var payload: Any? = JSONObject()
   private var success: Callback<T>? = null
   private var failure: Callback<T>? = null
   private var loader = true
@@ -73,7 +75,7 @@ abstract class Connection<T>() {
 
   // Event Methods
 
-  private fun onRequestCreated(endpoint: String, data: T?) {
+  private fun onRequestCreated(endpoint: String, data: Any?) {
     handleOnRequestCreated(endpoint, data);
   }
 
@@ -186,6 +188,8 @@ abstract class Connection<T>() {
       inputStream.close()
       httpURLConnection.disconnect()
 
+      Log.e("Response: ", response.toString());
+
       handler.post { onPostExecute(response.toString()) }
     } catch (e: IOException) {
       onError(e)
@@ -256,7 +260,7 @@ abstract class Connection<T>() {
 
   abstract fun hideLoader()
 
-  abstract fun handleOnRequestCreated(endpoint: String, data: T?)
+  abstract fun handleOnRequestCreated(endpoint: String, data: Any?)
 
   abstract fun handleOnResponseReceived(data: String?)
 
