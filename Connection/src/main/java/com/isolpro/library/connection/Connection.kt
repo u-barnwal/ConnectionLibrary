@@ -68,11 +68,6 @@ abstract class Connection<T>() {
     execute()
   }
 
-  fun get() {
-    this.requestMode = REQUST_MODE_GET;
-    execute()
-  }
-
   // Event Methods
 
   private fun onRequestCreated(endpoint: String, data: Any?) {

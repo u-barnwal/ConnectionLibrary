@@ -5,7 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import com.isolpro.library.connection.Connection
 
-const val BASE_ENDPOINT = "https://jsonplaceholder.typicode.com/";
+const val BASE_ENDPOINT = "https://jsonplaceholder.typicode.com";
 
 class ConnectionHelper<T>(private val ctx: Context, private val typeClass: Class<T>) :
   Connection<T>() {

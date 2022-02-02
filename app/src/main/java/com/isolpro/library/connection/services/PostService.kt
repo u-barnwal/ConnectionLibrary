@@ -9,8 +9,7 @@ object PostService {
 
   fun getPosts(ctx: Context): Connection<Post> {
     return ConnectionHelper(ctx, Post::class.java)
-      .endpoint("posts/")
-//      .payload(Post())
+      .endpoint("/posts")
       .loader(false)
   }
 
