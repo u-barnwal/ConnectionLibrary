@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.isolpro.custom.Callback
 import com.isolpro.library.connection.helpers.Utils
 import org.json.JSONException
@@ -15,7 +16,6 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-
 
 abstract class Connection<T>() {
   private val REQUST_MODE_POST = "POST";
@@ -230,7 +230,7 @@ abstract class Connection<T>() {
     onResponseReceived(mutatedResponseString)
 
     try {
-      val res: T = Gson().fromJson(mutatedResponseString, getClassType());
+      val res = Gson().fromJson<T>(mutatedResponseString, object : TypeToken<T>() {}.type);
 
       onSuccess(res);
 
@@ -274,8 +274,6 @@ abstract class Connection<T>() {
   abstract fun handleOnOfflineDataUnavailable()
 
   abstract fun handleOnError(e: Exception)
-
-  abstract fun getClassType(): Class<T>
 
   class Config(val baseEndpoint: String) {
   }

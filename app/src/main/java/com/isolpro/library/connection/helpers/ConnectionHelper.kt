@@ -7,7 +7,7 @@ import com.isolpro.library.connection.Connection
 
 const val BASE_ENDPOINT = "https://jsonplaceholder.typicode.com";
 
-class ConnectionHelper<T>(private val ctx: Context, private val typeClass: Class<T>) :
+class ConnectionHelper<T>(private val ctx: Context) :
   Connection<T>() {
   override var config: Config = Config(BASE_ENDPOINT)
 
@@ -57,9 +57,5 @@ class ConnectionHelper<T>(private val ctx: Context, private val typeClass: Class
 
   override fun handleOnNoResponseError() {
     Log.e("---------", "handleOnNoResponseError");
-  }
-
-  override fun getClassType(): Class<T> {
-    return typeClass;
   }
 }
