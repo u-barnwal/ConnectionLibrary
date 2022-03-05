@@ -1,7 +1,6 @@
 package com.isolpro.library.connection
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.isolpro.library.connection.services.PostService
 
@@ -10,15 +9,15 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-PostService.getPosts(this)
-  .success {
-    TODO("Use your data from $it")
+    PostService.getPosts(this)
+      .success {
+        // TODO("Use your data from $it")
 
-    // use $it.userId to get userId from Post
-  }
-  .failure {
-    TODO("Let user know that the request has failed")
-  }
-  .post()
+        // use $it.userId to get userId from Post
+      }
+      .failure {
+        // TODO("Let user know that the request has failed")
+      }
+      .post()
   }
 }

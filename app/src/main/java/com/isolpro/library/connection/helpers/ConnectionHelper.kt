@@ -23,6 +23,11 @@ class ConnectionHelper<T>(private val ctx: Context, private val typeClass: Class
     Toast.makeText(getContext(), "Hiding Loader", Toast.LENGTH_SHORT).show();
   }
 
+  override fun mutateRequest(payload: Any?): Any? {
+    Log.e("mutateRequest: ", payload.toString())
+    return payload;
+  }
+
   override fun handleOnRequestCreated(endpoint: String, data: Any?) {
     Log.e("Request:", "");
     Log.e(endpoint, data.toString());
