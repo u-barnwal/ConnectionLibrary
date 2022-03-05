@@ -17,7 +17,7 @@ allprojects {
 
 ```gradle
 dependencies {
-	implementation 'com.github.u-barnwal:ConnectionLibrary:VERSION'
+	implementation 'com.github.utsavdotpro:ConnectionLibrary:VERSION'
 }
 ```
 
