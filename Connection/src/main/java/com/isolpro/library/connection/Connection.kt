@@ -230,7 +230,7 @@ abstract class Connection<T>() {
     onResponseReceived(mutatedResponseString)
 
     try {
-      val res = Gson().fromJson<T>(mutatedResponseString, object : TypeToken<T>() {}.type);
+      val res = Gson().fromJson<T>(mutatedResponseString, object : TypeToken<Connection<T>>() {}.type);
 
       onSuccess(res);
 
