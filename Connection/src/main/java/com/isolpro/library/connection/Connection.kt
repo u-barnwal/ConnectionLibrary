@@ -48,7 +48,7 @@ abstract class Connection<T>() {
     return this;
   }
 
-  fun payload(payload: T?): Connection<T> {
+  fun payload(payload: Any?): Connection<T> {
     this.payload = payload;
     return this;
   }
