@@ -7,14 +7,14 @@ import com.isolpro.library.connection.models.Post
 
 object PostService {
 
-  fun getPosts(ctx: Context): Connection<Post> {
-    return ConnectionHelper(ctx, Post::class.java)
+  fun getPosts(ctx: Context): Connection<List<Post>> {
+    return ConnectionHelper<List<Post>>(ctx)
       .endpoint("/posts")
       .loader(false)
   }
 
   fun createPost(ctx: Context, post: Post): Connection<Post> {
-    return ConnectionHelper(ctx, Post::class.java)
+    return ConnectionHelper<Post>(ctx)
       .payload(post)
       .endpoint("/posts")
       .loader(false)
