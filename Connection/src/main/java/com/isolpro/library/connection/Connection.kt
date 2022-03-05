@@ -128,6 +128,8 @@ abstract class Connection<T>() {
   private fun execute() {
     if (loader) onShowLoader()
 
+    payload = mutateRequest(payload);
+
     if (!isOfflineMode()) mExecutor.execute { this.doInBackground() }
     else mExecutor.execute { this.doInBackgroundOffline() }
   }
@@ -254,6 +256,8 @@ abstract class Connection<T>() {
   abstract fun showLoader()
 
   abstract fun hideLoader()
+
+  abstract fun mutateRequest(payload: Any?): Any?
 
   abstract fun handleOnRequestCreated(endpoint: String, data: Any?)
 
