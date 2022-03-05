@@ -9,15 +9,15 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    PostService.getPosts(this)
-      .success {
-        // TODO("Use your data from $it")
-
-        // use $it.userId to get userId from Post
-      }
-      .failure {
-        // TODO("Let user know that the request has failed")
-      }
-      .post()
+//    PostService.getPosts(this)
+//      .success {
+//        // TODO("Use your data from $it")
+//
+//        // use $it.userId to get userId from Post
+//      }
+//      .failure {
+//        // TODO("Let user know that the request has failed")
+//      }
+//      .post()
   }
 }
