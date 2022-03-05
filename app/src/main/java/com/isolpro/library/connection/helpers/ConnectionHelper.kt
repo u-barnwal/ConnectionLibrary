@@ -33,6 +33,10 @@ class ConnectionHelper<T>(private val ctx: Context, private val typeClass: Class
     Log.e(endpoint, data.toString());
   }
 
+  override fun mutateResponse(data: String?): String? {
+    return data;
+  }
+
   override fun handleOnResponseReceived(data: String?) {
     Log.e("---------", "handleOnResponseReceived");
     data?.let { Log.e("---------", it) };

@@ -225,16 +225,18 @@ abstract class Connection<T>() {
       return
     }
 
-    onResponseReceived(responseString)
+    val mutatedResponseString = mutateResponse(responseString);
+
+    onResponseReceived(mutatedResponseString)
 
     try {
-      val res: T = Gson().fromJson(responseString, getClassType());
+      val res: T = Gson().fromJson(mutatedResponseString, getClassType());
 
       onSuccess(res);
 
       if (hasOfflineEndpoint()) {
         try {
-          offlineEndpoint?.let { Utils.writeToFile(getContext(), it, responseString) }
+          offlineEndpoint?.let { Utils.writeToFile(getContext(), it, mutatedResponseString) }
         } catch (e: IOException) {
           onError(e)
         }
@@ -260,6 +262,8 @@ abstract class Connection<T>() {
   abstract fun mutateRequest(payload: Any?): Any?
 
   abstract fun handleOnRequestCreated(endpoint: String, data: Any?)
+
+  abstract fun mutateResponse(data: String?): String?
 
   abstract fun handleOnResponseReceived(data: String?)
 
