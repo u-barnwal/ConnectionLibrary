@@ -30,7 +30,7 @@ abstract class Connection<T>() {
   private var payload: Any? = JSONObject()
   private var success: Callback<T>? = null
   private var failure: Callback<T>? = null
-  private var parser: ResponseParser<T>? = null
+  private var parser: ResponseParser<T> = DefaultResponseParser()
   private var loader = true
 
   private var endpoint: String = ""
@@ -237,11 +237,7 @@ abstract class Connection<T>() {
     onResponseReceived(mutatedResponseString)
 
     try {
-      val res: T? = if (parser == null) {
-        Gson().fromJson<T>(mutatedResponseString, object : TypeToken<Connection<T>>() {}.type);
-      } else {
-        mutatedResponseString?.let { parser!!.parse(it) };
-      }
+      val res: T? = mutatedResponseString?.let { parser.parse(it) }
 
       if (res == null) {
         onFailure();
