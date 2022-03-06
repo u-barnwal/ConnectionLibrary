@@ -3,6 +3,7 @@ package com.isolpro.library.connection.services
 import android.content.Context
 import com.isolpro.library.connection.Connection
 import com.isolpro.library.connection.helpers.ConnectionHelper
+import com.isolpro.library.connection.interfaces.ResponseParser
 import com.isolpro.library.connection.models.Post
 
 object PostService {
@@ -15,6 +16,11 @@ object PostService {
 
   fun createPost(ctx: Context, post: Post): Connection<Post> {
     return ConnectionHelper<Post>(ctx)
+      .parser(object : ResponseParser<Post> {
+        override fun parse(data: String): Post {
+          return Post()
+        }
+      })
       .payload(post)
       .endpoint("/posts")
       .loader(false)
