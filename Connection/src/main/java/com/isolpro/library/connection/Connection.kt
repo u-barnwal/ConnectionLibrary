@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.isolpro.custom.Callback
 import com.isolpro.library.connection.helpers.Utils
+import com.isolpro.library.connection.interfaces.ResponseParser
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
@@ -29,6 +30,7 @@ abstract class Connection<T>() {
   private var payload: Any? = JSONObject()
   private var success: Callback<T>? = null
   private var failure: Callback<T>? = null
+  private var parser: ResponseParser<T>? = null
   private var loader = true
 
   private var endpoint: String = ""
@@ -144,6 +146,11 @@ abstract class Connection<T>() {
     return this;
   }
 
+  fun parser(parser: ResponseParser<T>): Connection<T> {
+    this.parser = parser;
+    return this;
+  }
+
   private fun hasOfflineEndpoint(): Boolean {
     return offlineEndpoint != null && offlineEndpoint != ""
   }
@@ -230,7 +237,16 @@ abstract class Connection<T>() {
     onResponseReceived(mutatedResponseString)
 
     try {
-      val res = Gson().fromJson<T>(mutatedResponseString, object : TypeToken<Connection<T>>() {}.type);
+      val res: T? = if (parser == null) {
+        Gson().fromJson<T>(mutatedResponseString, object : TypeToken<Connection<T>>() {}.type);
+      } else {
+        mutatedResponseString?.let { parser!!.parse(it) };
+      }
+
+      if (res != null) {
+        onFailure();
+        return
+      }
 
       onSuccess(res);
 
