@@ -243,7 +243,7 @@ abstract class Connection<T>() {
         mutatedResponseString?.let { parser!!.parse(it) };
       }
 
-      if (res != null) {
+      if (res == null) {
         onFailure();
         return
       }
