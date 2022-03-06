@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.github.jitpack'
-version = '1.0'
+version = '1.0.6'
 
 android {
     compileSdk 31
@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -56,7 +56,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.jitpack'
                 artifactId = 'connection'
-                version = '1.0'
+                version = '1.0.6'
             }
         }
     }
