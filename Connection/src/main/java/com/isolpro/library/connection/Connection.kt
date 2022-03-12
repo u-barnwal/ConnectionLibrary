@@ -233,10 +233,15 @@ abstract class Connection<T>() {
 
     val mutatedResponseString = mutateResponse(responseString);
 
+    if (mutatedResponseString.isNullOrEmpty()) {
+      onFailure();
+      return
+    }
+
     onResponseReceived(mutatedResponseString)
 
     try {
-      val response: T? = mutatedResponseString?.let { parser.parse(it) }
+      val response: T? = parser.parse(mutatedResponseString)
 
       if (response == null) {
         onFailure();
