@@ -42,6 +42,10 @@ class ConnectionHelper<T>(private val ctx: Context) :
     data?.let { Log.e("---------", it) };
   }
 
+  override fun handleOnResponseGenerated(data: T?) {
+    Log.e("---------", "handleOnResponseGenerated");
+  }
+
   override fun handleOnOfflineDataUnsupported() {
     Log.e("---------", "handleOnOfflineDataUnsupported");
   }

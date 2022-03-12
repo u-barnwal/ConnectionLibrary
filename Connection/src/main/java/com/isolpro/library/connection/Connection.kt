@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.isolpro.custom.Callback
 import com.isolpro.library.connection.helpers.Utils
 import com.isolpro.library.connection.interfaces.ResponseParser
@@ -237,14 +236,15 @@ abstract class Connection<T>() {
     onResponseReceived(mutatedResponseString)
 
     try {
-      val res: T? = mutatedResponseString?.let { parser.parse(it) }
+      val response: T? = mutatedResponseString?.let { parser.parse(it) }
 
-      if (res == null) {
+      if (response == null) {
         onFailure();
         return
       }
 
-      onSuccess(res);
+      handleOnResponseGenerated(response);
+      onSuccess(response);
 
       if (hasOfflineEndpoint()) {
         try {
@@ -278,6 +278,8 @@ abstract class Connection<T>() {
   abstract fun mutateResponse(data: String?): String?
 
   abstract fun handleOnResponseReceived(data: String?)
+
+  abstract fun handleOnResponseGenerated(data: T?)
 
   abstract fun handleOnNoResponseError()
 
