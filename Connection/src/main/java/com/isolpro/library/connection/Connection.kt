@@ -131,8 +131,19 @@ abstract class Connection<T>() {
 
     payload = mutateRequest(payload);
 
-    if (!isOfflineMode()) mExecutor.execute { this.doInBackground() }
-    else mExecutor.execute { this.doInBackgroundOffline() }
+    // not connected to internet, use offline data
+    if (isOfflineMode()) {
+      this.doInBackgroundOffline()
+      return;
+    }
+
+    // connected to internet but using cache first strategy
+    if (config.useCacheFirstStrategy) {
+      // send offline data but silent any error or callbacks
+      this.doInBackgroundOffline(true)
+    }
+
+    mExecutor.execute { this.doInBackground() }
   }
 
   fun success(success: Callback<T>): Connection<T> {
@@ -201,27 +212,32 @@ abstract class Connection<T>() {
     }
   }
 
-  private fun doInBackgroundOffline() {
+  private fun doInBackgroundOffline(silentMode: Boolean = false) {
     if (!hasOfflineEndpoint()) {
-      onOfflineDataUnsupported()
+      if (!silentMode)
+        onOfflineDataUnsupported()
       return
     }
 
-    onRequestCreated("offline://$offlineEndpoint", payload);
+    if (!silentMode)
+      onRequestCreated("offline://$offlineEndpoint", payload)
 
     try {
       // Read data from file here
       val response: String? = offlineEndpoint?.let { Utils.readFromFile(getContext(), it) }
 
       if (response === null || response == "") {
-        onOfflineDataUnavailable()
+        if (!silentMode)
+          onOfflineDataUnavailable()
         return
       }
 
       handler.post { onPostExecute(response) }
     } catch (e: IOException) {
-      onError(e)
-      onOfflineDataUnavailable()
+      if (!silentMode) {
+        onError(e)
+        onOfflineDataUnavailable()
+      }
     }
   }
 
@@ -294,6 +310,5 @@ abstract class Connection<T>() {
 
   abstract fun handleOnError(e: Exception)
 
-  class Config(val baseEndpoint: String) {
-  }
+  class Config(val baseEndpoint: String, val useCacheFirstStrategy: Boolean = false)
 }
