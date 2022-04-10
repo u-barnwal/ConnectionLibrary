@@ -1,8 +1,7 @@
-package com.isolpro.library.connection
+package com.isolpro.connection
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.isolpro.library.connection.services.PostService
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
