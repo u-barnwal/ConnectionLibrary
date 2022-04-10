@@ -30,7 +30,8 @@ abstract class Connection<T>() {
   private var success: Callback<T>? = null
   private var failure: Callback<T>? = null
   private var parser: ResponseParser<T> = DefaultResponseParser()
-  private var loader = true
+  private var loader: Boolean = true
+  private var useCacheFirst: Boolean = false
 
   private var endpoint: String = ""
   private var requestMode: String = REQUST_MODE_POST
@@ -62,6 +63,11 @@ abstract class Connection<T>() {
   fun loader(loader: Boolean): Connection<T> {
     this.loader = loader;
     return this;
+  }
+
+  fun useCacheFirst(useCacheFirst: Boolean): Connection<T> {
+    this.useCacheFirst = useCacheFirst;
+    return this
   }
 
   fun post() {
@@ -138,7 +144,7 @@ abstract class Connection<T>() {
     }
 
     // connected to internet but using cache first strategy
-    if (config.useCacheFirstStrategy) {
+    if (useCacheFirst) {
       // send offline data but silent any error or callbacks
       this.doInBackgroundOffline(true)
     }
@@ -310,5 +316,5 @@ abstract class Connection<T>() {
 
   abstract fun handleOnError(e: Exception)
 
-  class Config(val baseEndpoint: String, val useCacheFirstStrategy: Boolean = false)
+  class Config(val baseEndpoint: String)
 }
