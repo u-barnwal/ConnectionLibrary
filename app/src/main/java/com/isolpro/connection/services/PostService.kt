@@ -1,10 +1,10 @@
-package com.isolpro.library.connection.services
+package com.isolpro.connection.services
 
 import android.content.Context
+import com.isolpro.connection.models.Post
 import com.isolpro.library.connection.Connection
 import com.isolpro.library.connection.helpers.ConnectionHelper
 import com.isolpro.library.connection.interfaces.ResponseParser
-import com.isolpro.library.connection.models.Post
 
 object PostService {
 

@@ -1,4 +1,4 @@
-package com.isolpro.library.connection
+package com.isolpro.connection
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.isolpro.library.connection.models
+package com.isolpro.connection.models
 
 class Post {
   val userId: Number = 0;
