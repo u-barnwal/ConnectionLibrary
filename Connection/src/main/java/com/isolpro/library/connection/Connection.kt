@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-abstract class Connection<T>() {
+abstract class Connection<T> {
   private val REQUST_MODE_POST = "POST";
   private val REQUST_MODE_GET = "GET";
 
@@ -248,15 +248,24 @@ abstract class Connection<T>() {
   }
 
   private fun onPostExecute(responseString: String?) {
-    if (responseString == null) {
+    if (responseString.isNullOrEmpty()) {
       onNoResponseError()
       return
+    }
+
+    if (!isOfflineMode() && hasOfflineEndpoint()) {
+      try {
+        offlineEndpoint?.let { Utils.writeToFile(getContext(), it, responseString) }
+      } catch (e: IOException) {
+        Log.e("IOException", "Failed to save offline data!")
+        onError(e)
+      }
     }
 
     val mutatedResponseString = mutateResponse(responseString);
 
     if (mutatedResponseString.isNullOrEmpty()) {
-      onFailure();
+      onFailure()
       return
     }
 
@@ -271,15 +280,7 @@ abstract class Connection<T>() {
       }
 
       handleOnResponseGenerated(response);
-      onSuccess(response);
-
-      if (hasOfflineEndpoint()) {
-        try {
-          offlineEndpoint?.let { Utils.writeToFile(getContext(), it, mutatedResponseString) }
-        } catch (e: IOException) {
-          onError(e)
-        }
-      }
+      onSuccess(response)
     } catch (e: JSONException) {
       onError(e)
       onFailure()
